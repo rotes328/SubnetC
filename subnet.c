@@ -35,7 +35,7 @@ bool checkIP(unsigned int *ipArray) {
         return false;
     }
     for (int i = 1; i < 4; i++) {
-        if (ipArray[i] > 255) {
+        if (ipArray[i] > 255 || ipArray[i] == '\0') {
             invalid(0);
             return false;
     } }
@@ -124,13 +124,14 @@ int checkMaskBytes(unsigned int *mask) {
     bool zeroFound = false;
     // Iterate mask and if there is a 
     for (int i = 0; i < 32; i++) {
-        if (zeroFound && bytemask[i]) {
+        if (zeroFound && bytemask[i] == 1) {
             invalid(1);
             exit(0);
         }
-        if (bytemask[i] == false) {
+        if (bytemask[i] == 0) {
             zeroFound = true;
-    } }
+        }
+    }
     return cidr;
 }
 
@@ -317,6 +318,19 @@ bool supernet(int ipClass, int maskClass) {
         return true;                        // Otherwise it's a supernet
 } }
 
+bool checkMaskFormat(char *mask) {
+    char first_letter = mask[0];
+    if (first_letter == '.') {
+        return false;
+    }
+    for (int i = 1; i < strlen(mask); i++) {
+        if (mask[i] == '.' && mask[i-1] == '.') {
+            return false;
+        }
+    }
+    return true;
+}
+
 int main(int argc, char *argv[])  {
 
     char *dd;
@@ -341,10 +355,19 @@ int main(int argc, char *argv[])  {
     else if (argc == 3) {
         dd = argv[1];
         mask = argv[2];
-         if (checkInputCharacters(mask, argc)) {
+        bool maskFormat = checkMaskFormat(mask);
+        if (maskFormat == false) {
+            invalid(1);
+            exit(0);
+        }
+        if (checkInputCharacters(mask, argc)) {
         maskArray = split(mask);     // malloc called
         cidr = checkMaskBytes(maskArray);
-    }
+        if (cidr == 0) {
+            invalid(1);
+            free(maskArray);
+            exit(0);
+        } }
     else {
         invalid(1);
         exit(0);
@@ -366,7 +389,7 @@ int main(int argc, char *argv[])  {
         free(maskArray);
         exit(0);
     }
-    
+    printDD(ipArray, true);
     printf("IP Address: ");
     printDD(ipArray, true);
     printf("Mask: ");
