@@ -11,8 +11,11 @@ error feedback.
 
 **Examples:**<br>
 <code>% ./ip 10.248.17.99/27<br>
+
 IP Address: 10.248.17.99<br>
+
 Mask: 255.255.255.224<br>
+
 Network address is: 10.248.17.96<br>
 Broadcast address is: 10.248.17.127<br>
 IP range is: 10.248.17.97 - 10.248.17.126<br>
