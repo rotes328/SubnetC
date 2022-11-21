@@ -11,7 +11,6 @@ error feedback.
 
 **Examples:**<br>
 <code>% ./ip 10.248.17.99/27 
-
 IP Address: 10.248.17.99  
 
 Mask: 255.255.255.224  
