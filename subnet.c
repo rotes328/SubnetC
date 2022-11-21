@@ -6,23 +6,17 @@
 
 void invalid(int error) {
     if (error == 0) {
-    printf("Invalid IP Address.\n");
+        printf("Invalid IP Address.\n");
+        return;
     }
-    else if (error == 1) {
-        printf("Multicast IP Address.\n");
-    }
-    else if (error == 2) {
-        printf("Mask is invalid.\n");
-    }
-    // exit(0);
+    printf("Invalid mask.\n");
+    return;
 }
 
 
 unsigned int *split(char *dd) {
     unsigned int *returnArray = malloc(4*sizeof(unsigned int));
     int j = 0;
-    int i = 0;
-
     char *token = strtok(dd, ".");
     returnArray[0] = atoi(token);
     while (token != NULL) {
@@ -31,30 +25,21 @@ unsigned int *split(char *dd) {
         token = strtok(NULL, ".");
     }
     return returnArray;
-
 }
 
 
 
-void checkIP(unsigned int *ipArray) {
-    int i;
-
-    if (ipArray[0] > 255) {
+bool checkIP(unsigned int *ipArray) {
+    if ((ipArray[0] > 239) || (ipArray[0] == 0)) {
         invalid(0);
-
+        return false;
     }
-    else if (ipArray[0] > 223) {
-        invalid(1);
-    }
-    else if (ipArray[0] == 0) {
-        invalid(0);
-    }
-
-    for (i = 0; i < 4; i++) {
+    for (int i = 1; i < 4; i++) {
         if (ipArray[i] > 255) {
             invalid(0);
-        }
-    }
+            return false;
+    } }
+    return true;
 }
 
 bool checkdots(char *dd) {
@@ -66,8 +51,7 @@ bool checkdots(char *dd) {
         }
         if (dd[i] == '/') {
             slash++;
-        }
-    }
+    } }
     if (dot == 3 && slash <= 1) {
         int thirddot = 3;
         for (int i = 0; i < strlen(dd); i++) {
@@ -77,18 +61,13 @@ bool checkdots(char *dd) {
             if (thirddot == 0) {
                 if (i != strlen(dd) -1 ) {
                     return true;
-                }
-            }
-        }
-        // return true;
-    }
+    } } } }
     return false;
 }
 
 int getCIDR(char *dd) {
     int cidr;
     int *returnArray = malloc(4*sizeof(int));
-
     char *token = strtok(dd, "/");
     while (token != NULL) {
         cidr = atoi(token);
@@ -99,11 +78,11 @@ int getCIDR(char *dd) {
 
 int checkCIDR(int cidr) {
     if (cidr == 0) {
-        invalid(2);
+        invalid(1);
         exit(0);
     }
     else if (cidr > 32) {
-        invalid(2);
+        invalid(1);
         exit(0);
     }
     return cidr;
@@ -126,11 +105,9 @@ int checkMaskBytes(unsigned int *mask) {
                 hasZero = true;
                 bytemask[(i*8)+j] = false;
                 if (firstOne > 0) {
-                    invalid(2);
+                    invalid(1);
                     exit(0);
-                }
-                }
-            }
+        } } }
         firstOne = 0;
         if (hasZero) {
             // If not all 1s, reverse byte
@@ -144,12 +121,11 @@ int checkMaskBytes(unsigned int *mask) {
             start++;
             end--;
     } } }
-
     bool zeroFound = false;
     // Iterate mask and if there is a 
     for (int i = 0; i < 32; i++) {
         if (zeroFound && bytemask[i]) {
-            invalid(2);
+            invalid(1);
             exit(0);
         }
         if (bytemask[i] == false) {
@@ -173,7 +149,6 @@ bool checkInputCharacters(char *dd, int argc) {
             if (checkdots(dd)) {
                 return true;
     } } } }
-//    printf("Here's the problem\n");
     return false;
 }
 
@@ -186,7 +161,6 @@ void help() {
 
 unsigned int *makeMask(int cidr) {
     unsigned int *returnArray = malloc(4*sizeof(unsigned int));
-
     for (int i = 0; i < 4; i++) {
         unsigned char currentByte;
         for (int j = 0; j < 8; j++) {
@@ -197,29 +171,18 @@ unsigned int *makeMask(int cidr) {
             }
             else {
                 currentByte = currentByte << 1;
-            }
-    }
+        } }
         int intByte = (int)(currentByte);
         returnArray[i] = intByte;
-
     }
-    // printf("Your constructed mask is: ");
-    // for (int i = 0; i < 3; i++) {
-    //     printf("%d.", returnArray[i]);
-    // }
-    // printf("%d\n", returnArray[3]);
 return returnArray;
 }
 
 unsigned int *subnet(unsigned int *ip, unsigned int *mask) {
     unsigned int *networkAddress = malloc(4*sizeof(unsigned int));
-    // int result[4];
-    int i;
-
-    for (i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
         networkAddress[i] = ip[i] & mask[i];
     }
-
     return networkAddress;
 }
 
@@ -249,23 +212,110 @@ unsigned int *lastAddress(unsigned int *broadcastIP) {
     return lastIP;
 }
 
-void printDD(unsigned int *dd) {
+void printDD(unsigned int *dd, bool newline) {
     for (int i = 0; i < 3; i++) {
     printf("%d.",  dd[i]);
     }
-    printf("%d\n", dd[3]);
+    printf("%d", dd[3]);
+    if (newline) {
+        printf("\n");
+} }
+
+void renderOutput(
+    unsigned int *networkAddress,
+    unsigned int *firstIP,
+    unsigned int *lastIP,
+    unsigned int *broadcastIP,
+    bool supernetFlag,
+    int ipClass,
+    int maskClass,
+    int cidr) {
+        if (maskClass == 6) {
+            printf("Host address: ");
+            printDD(networkAddress, false);
+            printf("/32\n");
+            return;
+        }
+        if (supernetFlag) {
+            printf("Supernet IP range is: ");
+            printDD(networkAddress, false);
+            printf(" - ");
+            printDD(broadcastIP, true);
+            return;
+        }
+        if (ipClass == 4) {
+            printf("Multicast range: ");
+            printDD(networkAddress, false);
+            printf("/%d\n", cidr);
+            printf("Range is: ");
+            printDD(networkAddress, false);
+            printf(" - ");
+            printDD(broadcastIP, true);
+            return;    
+        }
+        if (maskClass == 5) {                 // Handle 31
+            printf("Network address: ");
+            printDD(networkAddress, false);
+            printf("/%d\n", cidr);
+            printf("IP range is: ");
+            printDD(lastIP, false);
+            printf(" - ");
+            printDD(firstIP, true);
+        }
+        else {
+            printf("Network address is: ");
+            printDD(networkAddress, true);
+            printf("Broadcast address is: ");
+            printDD(broadcastIP, true);
+            printf("IP range is: ");
+            printDD(firstIP, false);
+            printf(" - ");
+            printDD(lastIP, true);
+        }
+    return;
 }
 
-void renderOutput(unsigned int *networkAddress, unsigned int *firstIP, unsigned int *lastIP, unsigned int *broadcastIP) {
-    printf("Network Address is: ");
-    printDD(networkAddress);
-    printf("First IP is: ");
-    printDD(firstIP);
-    printf("Last IP is ");
-    printDD(lastIP);
-    printf("Broadcast is ");
-    printDD(broadcastIP);
-}
+int getMaskClass(int mask) {
+    switch (mask) {
+        case 1 ... 7:
+            return 0;  // Supernet
+        case 8 ... 15:
+            return 2;  // Class A
+        case 16 ... 23:
+            return 3;  // Class B
+        case 24 ... 30:
+            return 4;  // Class C
+        case 31:
+            return 5;  // RFC 3021
+        default:
+            return 6;  // Host Address
+} }
+
+int getIPClass(int firstOctet) {
+    switch (firstOctet) {
+        case 1 ... 127:
+            return 1;  // Class A
+        case 128 ... 191:
+            return 2;  // Class B
+        case 192 ... 223:
+            return 3;  // Class C
+        default:
+            return 4;  // Multicast
+} }
+
+bool supernet(int ipClass, int maskClass) {
+    if (ipClass == 4 && maskClass == 0) {    // Multicast is supernet < /8
+        return true;
+    }
+    else if (ipClass == 4) {                 // Otherwise it's not a supernet
+        return false;
+    }
+    else if (ipClass < maskClass) {          // Classful ranges are not supernets in this condition
+        return false;
+    }
+    else {
+        return true;                        // Otherwise it's a supernet
+} }
 
 int main(int argc, char *argv[])  {
 
@@ -276,7 +326,6 @@ int main(int argc, char *argv[])  {
     int *constructedMask;
     int errno = 0;
     int cidr;
-
 
     if( argc == 2 ) {
         dd = argv[1];
@@ -297,11 +346,9 @@ int main(int argc, char *argv[])  {
         cidr = checkMaskBytes(maskArray);
     }
     else {
-        invalid(2);
+        invalid(1);
         exit(0);
-    }
-
-    }
+    } }
     else {
         help();
     }
@@ -314,28 +361,27 @@ int main(int argc, char *argv[])  {
         exit(0);
     }
 
-    checkIP(ipArray);
+    if (checkIP(ipArray) == false) {
+        free(ipArray);
+        free(maskArray);
+        exit(0);
+    }
     
-    // Print IP
     printf("IP Address: ");
-    for (int i = 0; i < 3; i++) {
-        printf("%d.", ipArray[i]);
-    }
-    printf("%d\n", ipArray[3]);
-
-    // Print Mask
+    printDD(ipArray, true);
     printf("Mask: ");
-    for (int i = 0; i < 3; i++) {
-        printf("%d.", maskArray[i]);
-    }
-    printf("%d\n", maskArray[3]);
+    printDD(maskArray, true);
 
     unsigned int *networkAddress = subnet(ipArray, maskArray);
     unsigned int *firstIP = firstAddress(networkAddress);
     unsigned int *broadcastIP = broadcast(networkAddress, maskArray);
     unsigned int *lastIP = lastAddress(broadcastIP);
+    int firstOctet = networkAddress[0];
+    int maskClass = getMaskClass(cidr);
+    int ipClass = getIPClass(firstOctet);
+    bool supernetFlag = supernet(ipClass, maskClass);
 
-    renderOutput(networkAddress, firstIP, lastIP, broadcastIP);
+    renderOutput(networkAddress, firstIP, lastIP, broadcastIP, supernetFlag, ipClass, maskClass, cidr);
 
     free(firstIP);
     free(broadcastIP);
