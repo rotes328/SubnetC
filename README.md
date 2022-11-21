@@ -12,9 +12,9 @@ error feedback.
 **Examples:**<br>
 <code>% ./ip 10.248.17.99/27<br>
 
-IP Address: 10.248.17.99<br>
+IP Address: 10.248.17.99
 
-Mask: 255.255.255.224<br>
+Mask: 255.255.255.224
 
 Network address is: 10.248.17.96<br>
 Broadcast address is: 10.248.17.127<br>
