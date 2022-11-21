@@ -256,6 +256,17 @@ void printDD(unsigned int *dd) {
     printf("%d\n", dd[3]);
 }
 
+void renderOutput(unsigned int *networkAddress, unsigned int *firstIP, unsigned int *lastIP, unsigned int *broadcastIP) {
+    printf("Network Address is: ");
+    printDD(networkAddress);
+    printf("First IP is: ");
+    printDD(firstIP);
+    printf("Last IP is ");
+    printDD(lastIP);
+    printf("Broadcast is ");
+    printDD(broadcastIP);
+}
+
 int main(int argc, char *argv[])  {
 
     char *dd;
@@ -324,18 +335,7 @@ int main(int argc, char *argv[])  {
     unsigned int *broadcastIP = broadcast(networkAddress, maskArray);
     unsigned int *lastIP = lastAddress(broadcastIP);
 
-    printf("Network Address is: ");
-    printDD(networkAddress);
-    printf("First IP is: ");
-    printDD(firstIP);
-    printf("Last IP is ");
-    printDD(lastIP);
-    printf("Broadcast is ");
-    printDD(broadcastIP);
-    // for (int i = 0; i < 3; i++) {
-    //     printf("%d.",  networkAddress[i]);
-    // }
-    // printf("%d\n", networkAddress[3]);
+    renderOutput(networkAddress, firstIP, lastIP, broadcastIP);
 
     free(firstIP);
     free(broadcastIP);
