@@ -18,8 +18,8 @@ void invalid(int error) {
 }
 
 
-int *split(char *dd) {
-    int *returnArray = malloc(4*sizeof(int));
+unsigned int *split(char *dd) {
+    unsigned int *returnArray = malloc(4*sizeof(unsigned int));
     int j = 0;
     int i = 0;
 
@@ -36,11 +36,12 @@ int *split(char *dd) {
 
 
 
-void checkIP(int *ipArray) {
+void checkIP(unsigned int *ipArray) {
     int i;
 
     if (ipArray[0] > 255) {
         invalid(0);
+
     }
     else if (ipArray[0] > 223) {
         invalid(1);
@@ -57,10 +58,9 @@ void checkIP(int *ipArray) {
 }
 
 bool checkdots(char *dd) {
-    int i;
     int dot = 0;
     int slash = 0;
-    for (i = 0; i<strlen(dd); i++) {
+    for (int i = 0; i < strlen(dd); i++) {
         if (dd[i] == '.') {
             dot++;
         }
@@ -69,7 +69,18 @@ bool checkdots(char *dd) {
         }
     }
     if (dot == 3 && slash <= 1) {
-        return true;
+        int thirddot = 3;
+        for (int i = 0; i < strlen(dd); i++) {
+            if (dd[i] == '.') {
+                thirddot--;
+            }
+            if (thirddot == 0) {
+                if (i != strlen(dd) -1 ) {
+                    return true;
+                }
+            }
+        }
+        // return true;
     }
     return false;
 }
@@ -89,16 +100,16 @@ int getCIDR(char *dd) {
 int checkCIDR(int cidr) {
     if (cidr == 0) {
         invalid(2);
-        return 0;
+        exit(0);
     }
     else if (cidr > 32) {
         invalid(2);
-        return 0;
+        exit(0);
     }
     return cidr;
 }
 
-int checkMaskBytes(int *mask) {
+int checkMaskBytes(unsigned int *mask) {
     int firstOne = 0;
     int cidr = 0;
     bool bytemask[32];
@@ -144,12 +155,6 @@ int checkMaskBytes(int *mask) {
         if (bytemask[i] == false) {
             zeroFound = true;
     } }
-    // printf("\n");
-    // printf("Byte Array: ");
-    // for (int k = 0; k < 32; k++) {
-    //     printf("%d", bytemask[k]);
-    // }
-    // printf("\n");
     return cidr;
 }
 
@@ -173,14 +178,14 @@ bool checkInputCharacters(char *dd, int argc) {
 }
 
 void help() {
-    printf("Please supply an argument.\n");
+    printf("Please supply one or two arguments.\n");
     printf("%% ip 192.168.20.4/29\n");
     printf("%% ip 172.16.20.40 255.255.255.128\n");
     exit(0);
 }
 
-int *makeMask(int cidr) {
-    int *returnArray = malloc(4*sizeof(int));
+unsigned int *makeMask(int cidr) {
+    unsigned int *returnArray = malloc(4*sizeof(unsigned int));
 
     for (int i = 0; i < 4; i++) {
         unsigned char currentByte;
@@ -206,27 +211,57 @@ int *makeMask(int cidr) {
 return returnArray;
 }
 
-void subnet(int *ip, int *mask) {
-    int result[4];
+unsigned int *subnet(unsigned int *ip, unsigned int *mask) {
+    unsigned int *networkAddress = malloc(4*sizeof(unsigned int));
+    // int result[4];
     int i;
 
     for (i = 0; i < 4; i++) {
-        result[i] = ip[i] & mask[i];
+        networkAddress[i] = ip[i] & mask[i];
     }
 
-    printf("Network Address is ");
-    for (i = 0; i < 3; i++) {
-        printf("%d.", result[i]);
+    return networkAddress;
+}
+
+unsigned int *firstAddress(unsigned int *networkAddress) {
+    unsigned int *firstIP = malloc(4*sizeof(unsigned int));
+    for (int i = 0; i < 3; i++) {
+        firstIP[i] = networkAddress[i];
     }
-    printf("%d\n", result[3]);
+    firstIP[3] = (networkAddress[3] + 1);
+    return firstIP;
+}
+
+unsigned int *broadcast(unsigned int *networkAddress, unsigned int *mask) {
+    unsigned int *broadcastIP = malloc(4*sizeof(unsigned int));
+    for (int i = 0; i < 4; i++) {
+        broadcastIP[i] = (~mask[i] & 0xff) + networkAddress[i];
+    }
+    return broadcastIP;
+}
+
+unsigned int *lastAddress(unsigned int *broadcastIP) {
+    unsigned int *lastIP = malloc(4*sizeof(unsigned int));
+    for (int i = 0; i < 3; i++) {
+        lastIP[i] = broadcastIP[i];
+    }
+    lastIP[3] = (broadcastIP[3] - 1);
+    return lastIP;
+}
+
+void printDD(unsigned int *dd) {
+    for (int i = 0; i < 3; i++) {
+    printf("%d.",  dd[i]);
+    }
+    printf("%d\n", dd[3]);
 }
 
 int main(int argc, char *argv[])  {
 
     char *dd;
     char *mask;
-    int *ipArray;
-    int *maskArray;
+    unsigned int *ipArray;
+    unsigned int *maskArray;
     int *constructedMask;
     int errno = 0;
     int cidr;
@@ -252,6 +287,7 @@ int main(int argc, char *argv[])  {
     }
     else {
         invalid(2);
+        exit(0);
     }
 
     }
@@ -260,14 +296,7 @@ int main(int argc, char *argv[])  {
     }
 
     if (checkInputCharacters(dd, argc)) {
-
         ipArray = split(dd);       // malloc called
-
-        // printf("Your IP is: ");
-        // for (int i = 0; i < 3; i++) {
-        //     printf("%d.", ipArray[i]);
-        // }
-        // printf("%d/%d\n", ipArray[3], cidr);
     }
     else {
         invalid(0);
@@ -290,8 +319,29 @@ int main(int argc, char *argv[])  {
     }
     printf("%d\n", maskArray[3]);
 
-    subnet(ipArray, maskArray);
+    unsigned int *networkAddress = subnet(ipArray, maskArray);
+    unsigned int *firstIP = firstAddress(networkAddress);
+    unsigned int *broadcastIP = broadcast(networkAddress, maskArray);
+    unsigned int *lastIP = lastAddress(broadcastIP);
 
+    printf("Network Address is: ");
+    printDD(networkAddress);
+    printf("First IP is: ");
+    printDD(firstIP);
+    printf("Last IP is ");
+    printDD(lastIP);
+    printf("Broadcast is ");
+    printDD(broadcastIP);
+    // for (int i = 0; i < 3; i++) {
+    //     printf("%d.",  networkAddress[i]);
+    // }
+    // printf("%d\n", networkAddress[3]);
+
+    free(firstIP);
+    free(broadcastIP);
+    free(lastIP);
+    free(networkAddress);
     free(maskArray);
     free(ipArray);
+    return 0;
 }
