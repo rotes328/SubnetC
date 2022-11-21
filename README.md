@@ -10,7 +10,7 @@ error feedback.
 <code>gcc -o ip subnet.c</code><br>
 
 **Examples:**<br>
-<i>% ./ip 10.248.17.99/27</i>
+<code>% ./ip 10.248.17.99/27</code>
     
     IP Address: 10.248.17.99
     Mask: 255.255.255.224
@@ -18,13 +18,13 @@ error feedback.
     Broadcast address is: 10.248.17.127
     IP range is: 10.248.17.97 - 10.248.17.126
 
-<i>% ./ip 172.16.24.0 255.192.0.0</i>
+<code>% ./ip 172.16.24.0 255.192.0.0</code>
     
     IP Address: 172.16.24.0
     Mask: 255.192.0.0
     Supernet IP range is: 172.0.0.0 - 172.63.255.255
 
-<i>% ./ip 233.40.20.9/29</i>
+<code>% ./ip 233.40.20.9/29</code>
     
     IP Address: 233.40.20.9
     Mask: 255.255.255.248
