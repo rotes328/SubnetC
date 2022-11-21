@@ -6,6 +6,11 @@ range for a given IP and mask. Mask can be in slash
 notation or dotted decimal. Provides error checking and
 error feedback.
 
+<code>test
+    test
+    test
+</code>
+
 **Build:**<br>
 <code>gcc -o ip subnet.c</code><br>
 
