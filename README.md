@@ -10,8 +10,7 @@ error feedback.
 <code>gcc -o ip subnet.c</code><br>
 
 **Examples:**<br>
-<code>% ./ip 10.248.17.99/27  
-
+<code>% ./ip 10.248.17.99/27<br>
 IP Address: 10.248.17.99  
 
 Mask: 255.255.255.224  
