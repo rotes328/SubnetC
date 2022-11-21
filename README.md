@@ -10,7 +10,7 @@ error feedback.
 <code>gcc -o ip subnet.c</code><br>
 
 **Examples:**<br>
-<code>% ./ip 10.248.17.99/27<br>
+<code>% ./ip 10.248.17.99/27 
 
 IP Address: 10.248.17.99  
 
