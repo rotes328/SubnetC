@@ -331,6 +331,14 @@ bool checkMaskFormat(char *mask) {
     return true;
 }
 
+bool checkForSlash(char *dd) {
+    char* hasSlash = strchr(dd, '/');
+    if (hasSlash == NULL) {
+        return false;
+    }
+    return true;
+}
+
 int main(int argc, char *argv[])  {
 
     char *dd;
@@ -345,6 +353,10 @@ int main(int argc, char *argv[])  {
         dd = argv[1];
         if ((strcmp(dd, "-h") == 0) || strcmp(dd, "--help") == 0) {
             help();
+        }
+        if (!checkForSlash(dd)) {
+            invalid(1);
+            exit(0);
         }
         cidr = getCIDR(dd);
         int cidr_code = checkCIDR(cidr);
@@ -389,7 +401,7 @@ int main(int argc, char *argv[])  {
         free(maskArray);
         exit(0);
     }
-    printDD(ipArray, true);
+
     printf("IP Address: ");
     printDD(ipArray, true);
     printf("Mask: ");
