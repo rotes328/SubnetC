@@ -265,7 +265,8 @@ void renderOutput(
         }
         else {
             printf("Network address is: ");
-            printDD(networkAddress, true);
+            printDD(networkAddress, false);
+            printf("/%d\n", cidr);
             printf("Broadcast address is: ");
             printDD(broadcastIP, true);
             printf("IP range is: ");
