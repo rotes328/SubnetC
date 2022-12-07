@@ -16,6 +16,12 @@ void invalid(int error) {
 
 unsigned int *split(char *dd) {
     unsigned int *returnArray = malloc(4*sizeof(unsigned int));
+    if (strstr(dd, "..")) {
+        for (int i = 0; i < 4; i++) {
+            returnArray[i] = 0;
+        }
+        return returnArray;
+    }
     int j = 0;
     char *token = strtok(dd, ".");
     returnArray[0] = atoi(token);
@@ -35,7 +41,7 @@ bool checkIP(unsigned int *ipArray) {
         return false;
     }
     for (int i = 1; i < 4; i++) {
-        if (ipArray[i] > 255 || ipArray[i] == '\0') {
+        if (ipArray[i] > 255) {
             invalid(0);
             return false;
     } }
