@@ -128,7 +128,6 @@ int checkMaskBytes(unsigned int *mask) {
             end--;
     } } }
     bool zeroFound = false;
-    // Iterate mask and if there is a 
     for (int i = 0; i < 32; i++) {
         if (zeroFound && bytemask[i] == 1) {
             invalid(1);
@@ -248,6 +247,7 @@ void renderOutput(
             printDD(networkAddress, false);
             printf(" - ");
             printDD(broadcastIP, true);
+            printf("Mask in slash notation: /%d\n", cidr);
             return;
         }
         if (ipClass == 4) {
@@ -272,7 +272,7 @@ void renderOutput(
         else {
             printf("Network address is: ");
             printDD(networkAddress, false);
-            printf("/%d\n", cidr);
+	        printf("/%d\n", cidr);
             printf("Broadcast address is: ");
             printDD(broadcastIP, true);
             printf("IP range is: ");
@@ -361,32 +361,34 @@ int main(int argc, char *argv[])  {
         if ((strcmp(dd, "-h") == 0) || strcmp(dd, "--help") == 0) {
             help();
         }
-        if (!checkForSlash(dd)) {
-            invalid(1);
-            exit(0);
-        }
-        cidr = getCIDR(dd);
-        int cidr_code = checkCIDR(cidr);
-        if (cidr_code == 0) {
-            exit(0); }
-        maskArray = makeMask(cidr);     // malloc called
-    }
-    else if (argc == 3) {
-        dd = argv[1];
-        mask = argv[2];
-        bool maskFormat = checkMaskFormat(mask);
-        if (maskFormat == false) {
-            invalid(1);
-            exit(0);
-        }
-        if (checkInputCharacters(mask, argc)) {
-        maskArray = split(mask);     // malloc called
-        cidr = checkMaskBytes(maskArray);
-        if (cidr == 0) {
-            invalid(1);
-            free(maskArray);
-            exit(0);
+        int temp = checkForSlash(dd);
+        if (!temp) {
+                invalid(1);
+                exit(0);
+            }
+        else {
+            cidr = getCIDR(dd);
+            int cidr_code = checkCIDR(cidr);
+            if (cidr_code == 0) {
+                exit(0); }
+            maskArray = makeMask(cidr);     // malloc called
         } }
+    else if (argc == 3) {
+            dd = argv[1];
+            mask = argv[2];
+            bool maskFormat = checkMaskFormat(mask);
+            if (maskFormat == false) {
+                invalid(1);
+                exit(0);
+            }
+            if (checkInputCharacters(mask, argc)) {
+            maskArray = split(mask);     // malloc called
+            cidr = checkMaskBytes(maskArray);
+            if (cidr == 0) {
+                invalid(1);
+                free(maskArray);
+                exit(0);
+            } }
     else {
         invalid(1);
         exit(0);
