@@ -7,7 +7,7 @@ notation or dotted decimal. Provides error checking and
 error feedback.
 
 **Build:**<br>
-<code>gcc -o ip subnet.c</code><br>
+<code>gcc -std=c99 -o ip subnet.c</code><br>
 
 **Examples:**<br>
 <code>% ./ip 10.248.17.99/27</code>
